@@ -6,24 +6,25 @@ defmodule Blockchain do
   Based on: https://www.youtube.com/watch?v=XSJXrCSQaWw
   """
 
-  def new() do
+  def new(difficulty) do
     genesis_block = create_genesis_block()
-    [genesis_block]
+    {difficulty, [genesis_block]}
   end
 
   defp create_genesis_block() do
-    Block.new(%{genesis: true}, 0, "0")
+    Block.new(%{genesis: true}, 0, "0", 0)
   end
 
   def get_last_block(chain) do
     List.last(chain)
   end
 
-  def add_new_block(chain, block_data) when is_list(chain) and is_map(block_data) do
+  def add_new_block({difficulty, chain}, block_data)
+      when is_integer(difficulty) and is_list(chain) and is_map(block_data) do
     last_block = get_last_block(chain)
     new_index = last_block.index + 1
-    new_block = Block.new(block_data, new_index, last_block.hash)
-    chain ++ [new_block]
+    new_block = Block.new(block_data, new_index, last_block.hash, difficulty)
+    {difficulty, chain ++ [new_block]}
   end
 
   def is_chain_valid?([_h | _t] = chain) when is_list(chain) do
